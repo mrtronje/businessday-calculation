@@ -1,15 +1,16 @@
 <?php
 
-namespace bdc\Calculation;
+namespace Bdc;
 
 use Carbon\Carbon;
+use Bdc\NumericHelper;
 
 class Calculation
 {
 
+    //replace Carbo with date for more acceptance
     public static function weekDays(Carbon $start, Carbon $end): int
     {
-    
         $reverse = $end->isBefore($start);
         if($reverse) {
           [$start, $end] = [$end, $start];
@@ -17,8 +18,8 @@ class Calculation
 
         $startDay = $start->day;
         $totalDays = abs($end->diffInDays($start));
-        $containedSundays = self::containedPeriodicValues($startDay, $totalDays + $startDay, 0, 7);
-        $containedSaturdays = self::containedPeriodicValues($startDay, $totalDays + $startDay, 6, 7);
+        $containedSundays = NumericHelper::containedPeriodicValues($startDay, $totalDays + $startDay, 0, 7);
+        $containedSaturdays = NumericHelper::containedPeriodicValues($startDay, $totalDays + $startDay, 6, 7);
         $coefficient = $reverse ? -1 : 1;
 
         return $coefficient * ($totalDays - ($containedSaturdays + $containedSundays));
@@ -66,44 +67,5 @@ class Calculation
     {
         $x = +$x;
         return $x > 0 ? 1 : -1;
-    }
-    
-    public static function nearestPeriodicValue($point, $value, $period)
-    {
-        $relation = ($value - $point) / $period;
-
-        $equidistant = !(fmod($relation, 0.5)) && $relation % 1;
-
-        $mod = $equidistant ? $period : 0;
-
-        return $mod + ($value - $period * round($relation));
-    }
-
-    public static function containedPeriodicValues(Carbon $start, Carbon $end, $value, $period): int
-    {
-        if ($start === $end) {
-            return 0;
-        }
-
-        if ($start > $end) {
-            $newEnd = $start;
-            $start = $end;
-            $end = $newEnd;
-        }
-
-        $end--;
-
-        $nearest = self::nearestPeriodicValue($start, $value, $period);
-
-        if ($nearest - $start < 0) {
-            $nearest += $period;
-        }
-
-        if (($nearest - $start) > ($end - $start)) {
-            return 0;
-        } else {
-            return 1 + (int)(($end - $nearest) / $period);
-        }
-    }
-    
+    }   
 }
