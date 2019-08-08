@@ -1,0 +1,15 @@
+{
+    "name": "pascalchristen/businessday-calculation",
+    "description": "Businessday calculations for php",
+    "type": "library",
+    "require": {
+	"php": "^7.1",
+        "nesbot/carbon": "^2.22"
+    },
+    "authors": [
+        {
+            "name": "Pascal Christen",
+            "email": "github@tronje.ch"
+        }
+    ]
+}
