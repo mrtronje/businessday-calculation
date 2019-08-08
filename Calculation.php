@@ -11,18 +11,40 @@ class Calculation
     //replace Carbo with date for more acceptance
     public static function weekDays(Carbon $start, Carbon $end): int
     {
-        $reverse = $end->isBefore($start);
-        if($reverse) {
-          [$start, $end] = [$end, $start];
+       return self::workdays($start, $end, [0, 1, 1, 1, 1, 1, 0]);
+    }
+    
+    /**
+    * $workweek is a array where the keys are the days of the week. $i=0 -> Sunday, $i=1 -> Monday...
+    * TODO: better comments
+    */
+    public static function workDays(Carbon $start, Carbon $end, array $workweek = [0, 1, 1, 1, 1, 1, 0]): int
+    {
+        if (count($workweek) !== 7) {
+            throw new Exception('$workweek needs 7 values');
         }
+
+        $reverse = $end->isBefore($start);
+        if ($reverse) {
+            $start = $end;
+            $end = $start;
+        }
+
+        $coefficient = $reverse ? -1 : 1;
+
 
         $startDay = $start->day;
         $totalDays = abs($end->diffInDays($start));
-        $containedSundays = NumericHelper::containedPeriodicValues($startDay, $totalDays + $startDay, 0, 7);
-        $containedSaturdays = NumericHelper::containedPeriodicValues($startDay, $totalDays + $startDay, 6, 7);
-        $coefficient = $reverse ? -1 : 1;
+        $containedFreeDays = 0;
 
-        return $coefficient * ($totalDays - ($containedSaturdays + $containedSundays));
+        for ($i = 0; $i < count($workweek); $i++) {
+            if ($workweek[$i] !== 1) {
+                $containedDays = $this->containedPeriodicValues($startDay, $totalDays + $startDay, $i, 7);
+                $containedFreeDays += $containedDays * (1 - $workweek[$i]);
+            }
+        }
+
+        return $coefficient * ($totalDays - $containedFreeDays);
     }
     
     public static function addWeekDays(Carbon $date, $amount)
