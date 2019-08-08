@@ -8,7 +8,7 @@ use Bdc\NumericHelper;
 class Calculation
 {
 
-    //replace Carbo with date for more acceptance
+    //replace Carbon with date for more acceptance
     public static function weekDays(Carbon $start, Carbon $end): int
     {
        return self::workdays($start, $end, [0, 1, 1, 1, 1, 1, 0]);
@@ -47,7 +47,7 @@ class Calculation
         return $coefficient * ($totalDays - $containedFreeDays);
     }
     
-    public static function addWeekDays(Carbon $date, $amount)
+    public static function addWeekDays(Carbon $date, float $amount): Carbon
     {
         if ($amount === 0 || is_nan($amount)) {
             return $date;
@@ -80,12 +80,12 @@ class Calculation
         return $date;
     }
 
-    public static function subtractWeekDays(Carbon $date, $amount)
+    public static function subtractWeekDays(Carbon $date, float $amount): Carbon: 
     {
         return self::addWeekDays($date, -$amount);
     }
 
-    public static function determineSign($number): int
+    public static function determineSign(float $number): int
     {
         return $number <=> 0;
     }   
