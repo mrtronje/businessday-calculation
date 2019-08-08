@@ -11,7 +11,7 @@ class Calculation
     //replace Carbon with date for more acceptance
     public static function weekDays(Carbon $start, Carbon $end): int
     {
-       return self::workdays($start, $end, [0, 1, 1, 1, 1, 1, 0]);
+       return self::workDays($start, $end, [0, 1, 1, 1, 1, 1, 0]);
     }
     
     /**
