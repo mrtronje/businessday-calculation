@@ -26,8 +26,7 @@ class Calculation
 
         $reverse = $end->isBefore($start);
         if ($reverse) {
-            $start = $end;
-            $end = $start;
+            [$start, $end] = [$end, $start];
         }
 
         $coefficient = $reverse ? -1 : 1;
@@ -39,7 +38,7 @@ class Calculation
 
         for ($i = 0; $i < count($workweek); $i++) {
             if ($workweek[$i] !== 1) {
-                $containedDays = $this->containedPeriodicValues($startDay, $totalDays + $startDay, $i, 7);
+                $containedDays = NumericHelper::containedPeriodicValues($startDay, $totalDays + $startDay, $i, 7);
                 $containedFreeDays += $containedDays * (1 - $workweek[$i]);
             }
         }
