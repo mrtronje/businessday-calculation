@@ -2,6 +2,8 @@
 
 namespace Bdc;
 
+use Carbon\Carbon;
+
 class NumericHelper {
   
     private static function nearestPeriodicValue($point, $value, $period)
