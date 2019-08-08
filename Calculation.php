@@ -85,9 +85,8 @@ class Calculation
         return self::addWeekDays($date, -$amount);
     }
 
-    public static function determineSign($x)
+    public static function determineSign($number): int
     {
-        $x = +$x;
-        return $x > 0 ? 1 : -1;
+        return $number <=> 0;
     }   
 }
