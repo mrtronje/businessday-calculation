@@ -5,12 +5,14 @@ namespace Bdc;
 use Carbon\Carbon;
 use Bdc\NumericHelper;
 
-class Calculation
+class BusinessDay
 {
 
     //replace Carbon with date for more acceptance
-    public static function weekDays(Carbon $start, Carbon $end): int
+    public static function weekDaysBetween(DateTime $start, DateTime $end): int
     {
+       [$start, $end] = [Carbon::instance($start), Carbon::instance($end)];
+        
        return self::workDays($start, $end, [0, 1, 1, 1, 1, 1, 0]);
     }
     
@@ -18,11 +20,13 @@ class Calculation
     * $workweek is a array where the keys are the days of the week. $i=0 -> Sunday, $i=1 -> Monday...
     * TODO: better comments
     */
-    public static function workDays(Carbon $start, Carbon $end, array $workweek = [0, 1, 1, 1, 1, 1, 0]): int
+    public static function workDaysBetween(DateTime $start, DateTime $end, array $workweek = [0, 1, 1, 1, 1, 1, 0]): int
     {
         if (count($workweek) !== 7) {
             throw new Exception('$workweek needs 7 values');
         }
+        
+        [$start, $end] = [Carbon::instance($start), Carbon::instance($end)];
 
         $reverse = $end->isBefore($start);
         if ($reverse) {
@@ -46,12 +50,13 @@ class Calculation
         return $coefficient * ($totalDays - $containedFreeDays);
     }
     
-    public static function addWeekDays(Carbon $date, float $amount): Carbon
+    public static function addWeekDays(DateTime $date, float $amount): DateTime
     {
         if ($amount === 0 || is_nan($amount)) {
             return $date;
         }
 
+        $date = Carbon::instance($date);
         $sign = self::determineSign($amount);
         $day = $date->day;
         $absIncrement = abs($amount);
@@ -76,10 +81,10 @@ class Calculation
         $days += $absIncrement + $weekendsInbetween * 2;
 
         $date->addDays($sign * $days);
-        return $date;
+        return $date->toDateTime();
     }
 
-    public static function subtractWeekDays(Carbon $date, float $amount): Carbon: 
+    public static function subtractWeekDays(DateTime $date, float $amount): DateTime 
     {
         return self::addWeekDays($date, -$amount);
     }
