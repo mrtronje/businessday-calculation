@@ -50,7 +50,7 @@ class BusinessDay
         return $coefficient * ($totalDays - $containedFreeDays);
     }
     
-    public static function addWeekDays(DateTime $date, float $amount): DateTime
+    public static function addWorkDays(DateTime $date, float $amount): DateTime
     {
         if ($amount === 0 || is_nan($amount)) {
             return $date;
@@ -84,7 +84,7 @@ class BusinessDay
         return $date->toDateTime();
     }
 
-    public static function subtractWeekDays(DateTime $date, float $amount): DateTime 
+    public static function subtractWorkDays(DateTime $date, float $amount): DateTime 
     {
         return self::addWeekDays($date, -$amount);
     }
