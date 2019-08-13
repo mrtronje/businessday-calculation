@@ -4,8 +4,9 @@ namespace Bdc;
 
 use Carbon\Carbon;
 
-class NumericHelper {
-  
+class NumericHelper
+{
+
     private static function nearestPeriodicValue($point, $value, $period)
     {
         $relation = ($value - $point) / $period;
@@ -13,12 +14,13 @@ class NumericHelper {
         $mod = $equidistant ? $period : 0;
         return $mod + ($value - $period * round($relation));
     }
-    
-    public static function containedPeriodicValues(Carbon $start, Carbon $end, $value, $period): int
+
+    public static function containedPeriodicValues(int $start, int $end, $value, $period): int
     {
         if ($start === $end) {
             return 0;
         }
+
         if ($start > $end) {
             $newEnd = $start;
             $start = $end;
@@ -34,6 +36,6 @@ class NumericHelper {
         } else {
             return 1 + (int)(($end - $nearest) / $period);
         }
-    } 
-  
+    }
+
 }

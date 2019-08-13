@@ -7,25 +7,23 @@ use Bdc\NumericHelper;
 
 class BusinessDay
 {
-
-    //replace Carbon with date for more acceptance
-    public static function weekDaysBetween(DateTime $start, DateTime $end): int
+    public static function weekDaysBetween(\DateTime $start, \DateTime $end): int
     {
-       [$start, $end] = [Carbon::instance($start), Carbon::instance($end)];
-        
-       return self::workDays($start, $end, [0, 1, 1, 1, 1, 1, 0]);
+        [$start, $end] = [Carbon::instance($start), Carbon::instance($end)];
+
+        return self::workDaysBetween($start, $end, [0, 1, 1, 1, 1, 1, 0]);
     }
-    
+
     /**
-    * $workweek is a array where the keys are the days of the week. $i=0 -> Sunday, $i=1 -> Monday...
-    * TODO: better comments
-    */
-    public static function workDaysBetween(DateTime $start, DateTime $end, array $workweek = [0, 1, 1, 1, 1, 1, 0]): int
+     * $workweek is a array where the keys are the days of the week. $i=0 -> Sunday, $i=1 -> Monday...
+     * TODO: better comments
+     */
+    public static function workDaysBetween(\DateTime $start, \DateTime $end, array $workweek = [0, 1, 1, 1, 1, 1, 0]): int
     {
         if (count($workweek) !== 7) {
-            throw new Exception('$workweek needs 7 values');
+            throw new \Exception('$workweek needs 7 values');
         }
-        
+
         [$start, $end] = [Carbon::instance($start), Carbon::instance($end)];
 
         $reverse = $end->isBefore($start);
@@ -49,8 +47,8 @@ class BusinessDay
 
         return $coefficient * ($totalDays - $containedFreeDays);
     }
-    
-    public static function addWorkDays(DateTime $date, float $amount): DateTime
+
+    public static function addWorkDays(\DateTime $date, float $amount): \DateTime
     {
         if ($amount === 0 || is_nan($amount)) {
             return $date;
@@ -84,13 +82,13 @@ class BusinessDay
         return $date->toDateTime();
     }
 
-    public static function subtractWorkDays(DateTime $date, float $amount): DateTime 
+    public static function subtractWorkDays(\DateTime $date, float $amount): \DateTime
     {
-        return self::addWeekDays($date, -$amount);
+        return self::addWorkDays($date, -$amount);
     }
 
     public static function determineSign(float $number): int
     {
         return $number <=> 0;
-    }   
+    }
 }
