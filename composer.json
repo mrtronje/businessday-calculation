@@ -1,15 +1,26 @@
 {
-    "name": "pascalchristen/businessday-calculation",
-    "description": "Businessday calculations for php",
-    "type": "library",
-    "require": {
-	"php": "^7.1",
-        "nesbot/carbon": "^2.22"
-    },
-    "authors": [
-        {
-            "name": "Pascal Christen",
-            "email": "github@tronje.ch"
-        }
-    ]
+  "name": "pascalchristen/businessday-calculation",
+  "description": "Businessday calculations for php",
+  "type": "library",
+  "config": {
+    "optimize-autoloader": true
+  },
+  "require": {
+    "php": "^7.3",
+    "nesbot/carbon": "^2.22"
+  },
+  "authors": [
+    {
+      "name": "Pascal Christen",
+      "email": "github@tronje.ch"
+    }
+  ],
+  "require-dev": {
+    "phpunit/phpunit": "^8"
+  },
+  "autoload": {
+    "psr-4": {
+      "Bdc\\": "src"
+    }
+  }
 }
