@@ -10,12 +10,26 @@ class BusinessDay
 {
     protected static $holidays = [];
 
+    /**
+     * Workweek scheme.
+     *
+     * Keys:
+     * 0: Sunday
+     * 1: Monday
+     * 2: Tuesday
+     * 3: Wednesday
+     * 4: Thursday
+     * 5: Friday
+     * 6: Saturday
+     *
+     * Values:
+     * 0: Non workday
+     * 1: Workday
+     *
+     * @var array
+     */
     protected static $workweek = [0, 1, 1, 1, 1, 1, 0];
 
-    /**
-     * $workweek is a array where the keys are the days of the week. $i=0 -> Sunday, $i=1 -> Monday...
-     * TODO: better comments
-     */
     public static function workDaysBetween(\DateTime $start, \DateTime $end): int
     {
         if (count(self::$workweek) !== 7) {
@@ -106,7 +120,7 @@ class BusinessDay
 
     public static function isHoliday(\DateTime $date): bool
     {
-        return self::binarySearch($date, self::$holidays) >= 0;
+        return NumericHelper::binarySearch($date, self::$holidays) >= 0;
     }
 
     public static function setHolidays(array $holidays): void
@@ -121,36 +135,5 @@ class BusinessDay
         });
 
         return $arr;
-    }
-
-    public static function binarySearch($date, array $holidays): int
-    {
-        if (count($holidays) === 0) {
-            return -1;
-        }
-
-        $key = -1;
-        $low = 0;
-        $high = count($holidays) - 1;
-
-        while ($high >= $low) {
-            $mid = (int)floor(($high + $low) / 2);
-            $cmp = $date <=> $holidays[$mid];
-
-            if ($cmp < 0) {
-                $high = $mid - 1;
-            } elseif ($cmp > 0) {
-                $low = $mid + 1;
-            } else {
-                $key = $mid;
-                break;
-            }
-        }
-        return $key;
-    }
-
-    protected static function compareDates()
-    {
-
     }
 }

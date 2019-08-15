@@ -70,46 +70,6 @@ class BusinessDayTest extends TestCase
         );
     }
 
-    public function testBinarySearch(): void
-    {
-        $needle = DateTime::createFromFormat('Y-m-d', '2019-01-07');
-        $holidays = [
-            DateTime::createFromFormat('Y-m-d', '2019-01-07'),
-            DateTime::createFromFormat('Y-m-d', '2019-02-07'),
-            DateTime::createFromFormat('Y-m-d', '2019-03-07'),
-            DateTime::createFromFormat('Y-m-d', '2019-04-07'),
-        ];
-
-        $this->assertEquals(
-            0,
-            BusinessDay::binarySearch($needle, $holidays)
-        );
-
-        $needle = DateTime::createFromFormat('Y-m-d', '2019-02-07');
-        $this->assertEquals(
-            1,
-            BusinessDay::binarySearch($needle, $holidays)
-        );
-
-        $needle = DateTime::createFromFormat('Y-m-d', '2018-02-07');
-        $this->assertEquals(
-            -1,
-            BusinessDay::binarySearch($needle, $holidays)
-        );
-
-        $needle = DateTime::createFromFormat('Y-m-d', '2018-02-07');
-        $this->assertEquals(
-            -1,
-            BusinessDay::binarySearch($needle, [])
-        );
-
-        $needle = DateTime::createFromFormat('Y-m-d', '2018-02-07');
-        $this->assertEquals(
-            -1,
-            BusinessDay::binarySearch($needle, [DateTime::createFromFormat('Y-m-d', '2019-04-07')])
-        );
-    }
-
     public function testSortDateArray(): void
     {
         $holidays = [
