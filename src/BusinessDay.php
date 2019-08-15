@@ -4,29 +4,28 @@ namespace Bdc;
 
 use Carbon\Carbon;
 use Bdc\NumericHelper;
+use phpDocumentor\Reflection\Types\Static_;
 
 class BusinessDay
 {
-    public static function weekDaysBetween(\DateTime $start, \DateTime $end): int
-    {
-        [$start, $end] = [Carbon::instance($start), Carbon::instance($end)];
+    protected static $holidays = [];
 
-        return self::workDaysBetween($start, $end, [0, 1, 1, 1, 1, 1, 0]);
-    }
+    protected static $workweek = [0, 1, 1, 1, 1, 1, 0];
 
     /**
      * $workweek is a array where the keys are the days of the week. $i=0 -> Sunday, $i=1 -> Monday...
      * TODO: better comments
      */
-    public static function workDaysBetween(\DateTime $start, \DateTime $end, array $workweek = [0, 1, 1, 1, 1, 1, 0]): int
+    public static function workDaysBetween(\DateTime $start, \DateTime $end): int
     {
-        if (count($workweek) !== 7) {
+        if (count(self::$workweek) !== 7) {
             throw new \Exception('$workweek needs 7 values');
         }
 
         [$start, $end] = [Carbon::instance($start), Carbon::instance($end)];
 
         $reverse = $end->isBefore($start);
+
         if ($reverse) {
             [$start, $end] = [$end, $start];
         }
@@ -38,10 +37,10 @@ class BusinessDay
         $totalDays = abs($end->diffInDays($start));
         $containedFreeDays = 0;
 
-        for ($i = 0; $i < count($workweek); $i++) {
-            if ($workweek[$i] !== 1) {
+        for ($i = 0; $i < count(self::$workweek); $i++) {
+            if (self::$workweek[$i] !== 1) {
                 $containedDays = NumericHelper::containedPeriodicValues($startDay, $totalDays + $startDay, $i, 7);
-                $containedFreeDays += $containedDays * (1 - $workweek[$i]);
+                $containedFreeDays += $containedDays * (1 - self::$workweek[$i]);
             }
         }
 
@@ -50,13 +49,14 @@ class BusinessDay
 
     public static function addWorkDays(\DateTime $date, float $amount): \DateTime
     {
-        if ($amount === 0 || is_nan($amount)) {
+        if ($amount === 0) {
             return $date;
         }
 
+        $amount = ceil($amount);
         $date = Carbon::instance($date);
         $sign = self::determineSign($amount);
-        $day = $date->day;
+        $day = $date->dayOfWeek;
         $absIncrement = abs($amount);
 
         $days = 0;
@@ -79,7 +79,14 @@ class BusinessDay
         $days += $absIncrement + $weekendsInbetween * 2;
 
         $date->addDays($sign * $days);
-        return $date->toDateTime();
+
+        $dt = $date->toDateTime();
+
+        if (count(self::$holidays) > 0 && self::isHoliday($date)) {
+            return self::addWorkDays($dt, 1);
+        }
+
+        return $dt;
     }
 
     public static function subtractWorkDays(\DateTime $date, float $amount): \DateTime
@@ -90,5 +97,60 @@ class BusinessDay
     public static function determineSign(float $number): int
     {
         return $number <=> 0;
+    }
+
+    public static function getHolidays(): array
+    {
+        return self::$holidays;
+    }
+
+    public static function isHoliday(\DateTime $date): bool
+    {
+        return self::binarySearch($date, self::$holidays) >= 0;
+    }
+
+    public static function setHolidays(array $holidays): void
+    {
+        self::$holidays = self::sortDateArray($holidays);
+    }
+
+    public static function sortDateArray(array $arr): array
+    {
+        usort($arr, function ($a, $b) {
+            return $a <=> $b;
+        });
+
+        return $arr;
+    }
+
+    public static function binarySearch($date, array $holidays): int
+    {
+        if (count($holidays) === 0) {
+            return -1;
+        }
+
+        $key = -1;
+        $low = 0;
+        $high = count($holidays) - 1;
+
+        while ($high >= $low) {
+            $mid = (int)floor(($high + $low) / 2);
+            $cmp = $date <=> $holidays[$mid];
+
+            if ($cmp < 0) {
+                $high = $mid - 1;
+            } elseif ($cmp > 0) {
+                $low = $mid + 1;
+            } else {
+                $key = $mid;
+                break;
+            }
+        }
+        return $key;
+    }
+
+    protected static function compareDates()
+    {
+
     }
 }
