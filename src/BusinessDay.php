@@ -4,7 +4,7 @@ namespace Bdc;
 
 use Carbon\Carbon;
 use Bdc\NumericHelper;
-use phpDocumentor\Reflection\Types\Static_;
+use phpDocumentor\Reflection\Types\Self_;
 
 class BusinessDay
 {
@@ -32,10 +32,6 @@ class BusinessDay
 
     public static function workDaysBetween(\DateTime $start, \DateTime $end): int
     {
-        if (count(self::$workweek) !== 7) {
-            throw new \Exception('$workweek needs 7 values');
-        }
-
         [$start, $end] = [Carbon::instance($start), Carbon::instance($end)];
 
         $reverse = $end->isBefore($start);
@@ -61,46 +57,44 @@ class BusinessDay
         return $coefficient * ($totalDays - $containedFreeDays);
     }
 
-    public static function addWorkDays(\DateTime $date, float $amount): \DateTime
+
+    public static function freeDaysBetween(\DateTime $start, \DateTime $end): int
     {
-        if ($amount === 0) {
-            return $date;
+        [$start, $end] = [Carbon::instance($start), Carbon::instance($end)];
+
+        $reverse = $end->isBefore($start);
+
+        if ($reverse) {
+            [$start, $end] = [$end, $start];
         }
 
-        $amount = ceil($amount);
+        $coefficient = $reverse ? -1 : 1;
+
+        $startDay = $start->dayOfWeek;
+        $totalDays = abs($end->diffInDays($start));
+        $containedDays = 0;
+
+        for ($i = 0; $i < count(self::$workweek); $i++) {
+            if (self::$workweek[$i] === 0) {
+                $containedDays += NumericHelper::containedPeriodicValues($startDay, $totalDays + $startDay, $i, 7);
+
+            }
+        }
+        return $containedDays;
+    }
+
+    public static function addWorkDays(\DateTime $date, int $amount): \DateTime
+    {
         $date = Carbon::instance($date);
-        $sign = self::determineSign($amount);
-        $day = $date->dayOfWeek;
-        $absIncrement = abs($amount);
 
-        $days = 0;
-
-        if (($day === 0 && $sign === -1) || ($day === 6 && $sign === 1)) {
-            $days = 1;
+        while ($amount > 0) {
+            $date->addDays(1);
+            if(!self::isFreeDay($date)){
+                $amount--;
+            }
         }
 
-        $paddedAbsIncrement = $absIncrement;
-        if ($day !== 0 && $day !== 6 && $sign > 0) {
-            $paddedAbsIncrement += $day;
-        } else if ($day !== 0 && $day !== 6 && $sign < 0) {
-            $paddedAbsIncrement += 6 - $day;
-        }
-        $weekendsInbetween = max(
-                floor($paddedAbsIncrement / 5) - 1,
-                0
-            ) + ($paddedAbsIncrement > 5 && $paddedAbsIncrement % 5 > 0 ? 1 : 0);
-
-        $days += $absIncrement + $weekendsInbetween * 2;
-
-        $date->addDays($sign * $days);
-
-        $dt = $date->toDateTime();
-
-        if (count(self::$holidays) > 0 && self::isHoliday($date)) {
-            return self::addWorkDays($dt, 1);
-        }
-
-        return $dt;
+        return $date->toDateTime();
     }
 
     public static function subtractWorkDays(\DateTime $date, float $amount): \DateTime
@@ -108,14 +102,16 @@ class BusinessDay
         return self::addWorkDays($date, -$amount);
     }
 
-    public static function determineSign(float $number): int
-    {
-        return $number <=> 0;
-    }
-
     public static function getHolidays(): array
     {
         return self::$holidays;
+    }
+
+    public static function isFreeDay(\DateTime $date): bool
+    {
+        $cbDate = Carbon::instance($date);
+
+        return self::$workweek[$cbDate->dayOfWeek] === 0 || (count(self::$holidays) > 0 && self::isHoliday($date));
     }
 
     public static function isHoliday(\DateTime $date): bool
@@ -126,6 +122,21 @@ class BusinessDay
     public static function setHolidays(array $holidays): void
     {
         self::$holidays = self::sortDateArray($holidays);
+    }
+
+    public static function setWorkweek(array $workweek): void
+    {
+        if (count($workweek) !== 7) {
+            throw new \Exception('$workweek needs 7 values');
+        }
+
+        array_filter($workweek, function ($holiday) {
+            if (!is_numeric($holiday)) {
+                throw new \Exception('Workday values must be numeric');
+            }
+        });
+
+        self::$workweek = $workweek;
     }
 
     public static function sortDateArray(array $arr): array

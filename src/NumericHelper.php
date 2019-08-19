@@ -37,15 +37,15 @@ class NumericHelper
         }
     }
 
-    public static function binarySearch($needle, array $haystack): int
+    public static function binarySearch(\DateTime $needle, array $haystack): int
     {
-        if (count($needle) === 0) {
+        if (count($haystack) === 0) {
             return -1;
         }
 
         $key = -1;
         $low = 0;
-        $high = count($needle) - 1;
+        $high = count($haystack) - 1;
 
         while ($high >= $low) {
             $mid = (int)floor(($high + $low) / 2);
@@ -61,5 +61,10 @@ class NumericHelper
             }
         }
         return $key;
+    }
+
+    public static function determineSign(float $number): int
+    {
+        return $number <=> 0;
     }
 }
